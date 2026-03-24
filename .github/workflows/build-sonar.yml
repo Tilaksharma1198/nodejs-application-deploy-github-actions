@@ -35,7 +35,7 @@ jobs:
           args: >
             -Dsonar.projectKey=GithubAction
             -Dsonar.projectName=GithubAction
-            -Dsonar.host.url=http://16.16.96.22:9000
+            -Dsonar.host.url=http://13.63.53.143:9000
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       # 6. Build Docker Image
