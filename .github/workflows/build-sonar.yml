@@ -1,4 +1,4 @@
-name: Build and Sonar Scan
+name: Build, Sonar and Trivy Scan
 
 on:
   push:
@@ -6,24 +6,29 @@ on:
   pull_request:
 
 jobs:
-  build-and-scan:
+  build-scan:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # 4. Run tests
       - name: Run tests
         run: npm test || echo "No tests found"
 
+      # 5. SonarQube Scan
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2
         with:
@@ -32,3 +37,16 @@ jobs:
             -Dsonar.projectName=GithubAction
             -Dsonar.host.url=http://16.16.96.22:9000
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+      # 6. Build Docker Image
+      - name: Build Docker Image
+        run: docker build -t node-app .
+
+      # 7. Trivy Scan (Docker Image)
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: node-app
+          format: table
+          exit-code: 0
+          severity: HIGH,CRITICAL
